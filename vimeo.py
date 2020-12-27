@@ -167,6 +167,10 @@ def bit_rate(entry_data):
     return -int(entry_data['avg_bitrate'])
 
 
+def limit_bitrate(entry_data):
+    return entry_data['height'] <= 1080
+
+
 def process_video(video_data):
     video_name = video_data['name']
     video_url = video_data['url']
@@ -186,7 +190,7 @@ def process_video(video_data):
     with urllib.request.urlopen(video_url) as master_response:
         master_data = json.loads(master_response.read())
 
-        video_data = sorted(master_data['video'], key=bit_rate)[0]
+        video_data = sorted(filter(limit_bitrate, master_data['video']), key=bit_rate)[0]
         audio_data = sorted(master_data['audio'], key=bit_rate)[0]
 
         video_base_url = urllib.parse.urljoin(urllib.parse.urljoin(video_url, master_data['base_url']),
